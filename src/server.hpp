@@ -1,48 +1,13 @@
 #include <cstdlib>
+#include <ctime>
 #include <iostream>
+#include <queue>
+#include <vector>
 #include <boost/bind/bind.hpp>
 #include <boost/asio.hpp>
 #include "json.hpp"
 #include "Common.hpp"
-
-using boost::asio::ip::tcp;
-
-class Core
-{
-public:
-    // "Регистрирует" нового пользователя и возвращает его ID.
-    std::string RegisterNewUser(const std::string& aUserName)
-    {
-        size_t newUserId = mUsers.size();
-        mUsers[newUserId] = aUserName;
-
-        return std::to_string(newUserId);
-    }
-
-    // Запрос имени клиента по ID
-    std::string GetUserName(const std::string& aUserId)
-    {
-        const auto userIt = mUsers.find(std::stoi(aUserId));
-        if (userIt == mUsers.cend())
-        {
-            return "Error! Unknown User";
-        }
-        else
-        {
-            return userIt->second;
-        }
-    }
-
-private:
-    // <UserId, UserName>
-    std::map<size_t, std::string> mUsers;
-};
-
-Core& GetCore()
-{
-    static Core core;
-    return core;
-}
+#include "core.hpp"
 
 class session
 {
@@ -75,21 +40,8 @@ public:
 
             // Парсим json, который пришёл нам в сообщении.
             auto j = nlohmann::json::parse(data_);
-            auto reqType = j["ReqType"];
-
-            std::string reply = "Error! Unknown request type";
-            if (reqType == Requests::Registration)
-            {
-                // Это реквест на регистрацию пользователя.
-                // Добавляем нового пользователя и возвращаем его ID.
-                reply = GetCore().RegisterNewUser(j["Message"]);
-            }
-            else if (reqType == Requests::Hello)
-            {
-                // Это реквест на приветствие.
-                // Находим имя пользователя по ID и приветствуем его по имени.
-                reply = "Hello, " + GetCore().GetUserName(j["UserId"]) + "!\n";
-            }
+    
+            std::string reply = manage_req(j);
 
             boost::asio::async_write(socket_,
                 boost::asio::buffer(reply, reply.size()),
@@ -117,11 +69,89 @@ public:
         }
     }
 
+    std::string manage_req(const nlohmann::json& j) {
+        std::string reply;
+        std::string reqType = j["ReqType"];
+
+        if (reqType == Requests::Registration)
+        {
+            // Это реквест на регистрацию пользователя.
+            // Добавляем нового пользователя и возвращаем его ID.
+            std::cout << "Register request" << std::endl;
+            reply = std::to_string(GetCore().RegisterNewUser(j["Message"]));
+        }
+        else if (reqType == Requests::Hello)
+        {
+            // Это реквест на приветствие.
+            // Находим имя пользователя по ID и приветствуем его по имени.
+            std::cout << "Hello request" << std::endl;
+            reply = "Hello, " + GetCore().GetUser(j["UserId"])->getUserName() + "!\n";
+        }
+        else if (reqType == Requests::Sale or reqType == Requests::Purchase)
+        {
+            std::cout << "New application" << std::endl;
+            GetCore().CreateApplication(j);
+            reply = "New application created\n";
+        }
+        else if (reqType == Requests::Consume)
+        {
+            GetCore().Consume();
+            reply = "";
+        }
+        else
+        {
+            reply = "Error! Unknown request type";
+        }
+        return reply;
+    }
+
 private:
     tcp::socket socket_;
     enum { max_length = 1024 };
     char data_[max_length];
 };
+/*
+class session2
+{
+public:
+    session2(boost::asio::io_service& io_service)
+        : socket_(io_service)
+    {
+    }
+
+    tcp::socket& socket()
+    {
+        return socket_;
+    }
+
+    void start()
+    {
+        char data_[1024];
+        socket_.async_read_some(boost::asio::buffer(data_, 1024),
+            boost::bind(&session::handle_read, this,
+                boost::asio::placeholders::error,
+                boost::asio::placeholders::bytes_transferred));
+    }
+
+    // Обработка полученного сообщения.
+    void handle_read(const boost::system::error_code& error,
+        size_t bytes_transferred)
+    {
+        if (!error)
+        {
+            GetCore().Consume();
+        }
+        else
+        {
+            delete this;
+        }
+    }
+
+private:
+    tcp::socket socket_;
+};
+*/
+
 
 class server
 {
@@ -134,8 +164,7 @@ public:
 
         session* new_session = new session(io_service_);
         acceptor_.async_accept(new_session->socket(),
-            boost::bind(&server::handle_accept, this, new_session,
-                boost::asio::placeholders::error));
+            boost::bind(&server::handle_accept, this, new_session, boost::asio::placeholders::error));
     }
 
     void handle_accept(session* new_session,
@@ -155,26 +184,16 @@ public:
         }
     }
 
+    tcp::acceptor& get_acceptor() 
+    {
+        return acceptor_;
+    }
+
 private:
     boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
 };
 
-int main()
-{
-    try
-    {
-        boost::asio::io_service io_service;
-        static Core core;
-
-        server s(io_service);
-
-        io_service.run();
-    }
-    catch (std::exception& e)
-    {
-        std::cerr << "Exception: " << e.what() << "\n";
-    }
-
-    return 0;
+void consCall() {
+    GetCore().Consume();
 }

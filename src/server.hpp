@@ -93,11 +93,12 @@ public:
             GetCore().CreateApplication(j);
             reply = "New application created\n";
         }
+        /*
         else if (reqType == Requests::Consume)
         {
             GetCore().Consume();
             reply = "";
-        }
+        } */
         else
         {
             reply = "Error! Unknown request type";

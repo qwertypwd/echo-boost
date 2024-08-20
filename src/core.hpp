@@ -33,7 +33,7 @@ public:
     // Запрос имени клиента по ID
     Models::User* GetUser(size_t aUserId)
     {
-        std::cout << aUserId << " get userId" << std::endl;
+        //std::cout << aUserId << " get userId" << std::endl;
         const auto userIt = mUsers.find(aUserId);
         if (userIt == mUsers.cend())
         {   
@@ -122,11 +122,11 @@ public:
         recentApp = b;
     }
 private:
-    // <UserId, UserName> // User
+    // <UserId, User*> userlist
     std::map<size_t, Models::User*> mUsers;
-    // Sales app queue
+    // <User*> sales app queue
     std::priority_queue<Models::Application*, std::vector<Models::Application*>, Models::Application::greater> sq;
-    // Purchase app queue
+    // <User*> purchase app queue
     std::priority_queue<Models::Application*, std::vector<Models::Application*>, Models::Application::less> pq;
     // Kostil))0
     bool recentApp = false;

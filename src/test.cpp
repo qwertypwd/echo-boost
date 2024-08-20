@@ -1,6 +1,7 @@
 #include "server.hpp"
 #include "json.hpp"
 #include "Common.hpp"
+#include "testcases.hpp"
 #include <chrono>
 #include <thread>
 
@@ -25,8 +26,8 @@ struct Fixture
 	}
 	// А вот и сам тестовый объект
 	Core core;
-	std::string bibaId;
-	std::string bobaId;
+	size_t bibaId;
+	size_t bobaId;
 };
 
 BOOST_FIXTURE_TEST_CASE(testCore, Fixture)
@@ -46,7 +47,7 @@ BOOST_FIXTURE_TEST_CASE(testCoreCreateApp, Fixture)
 	auto head = core.sq.top();
 	BOOST_CHECK_EQUAL(head->getAppCost(), 99);
 }
- 
+
 BOOST_FIXTURE_TEST_CASE(testCoreQueue, Fixture)
 {
     nlohmann::json req;
@@ -123,6 +124,19 @@ BOOST_FIXTURE_TEST_CASE(testCoreConsumer, Fixture)
 
 	BOOST_CHECK_EQUAL(core.sq.size(), 1);
 	BOOST_CHECK(core.pq.empty());
+
+	Models::User* biba = core.GetUser(bibaId);
+	Models::User* boba = core.GetUser(bobaId);
+
+	int bibaUsd = biba->getUserUsd();
+	int bibaRur = biba->getUserRur();
+	int bobaUsd = boba->getUserUsd();
+	int bobaRur = boba->getUserRur();
+
+	BOOST_CHECK_EQUAL(bibaUsd, -1);
+	BOOST_CHECK_EQUAL(bibaRur, 99);
+	BOOST_CHECK_EQUAL(bobaUsd, 1);
+	BOOST_CHECK_EQUAL(bobaRur, -99);
 }
 
 BOOST_AUTO_TEST_SUITE_END()

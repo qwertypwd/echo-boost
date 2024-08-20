@@ -14,11 +14,11 @@ int main()
     {
         boost::asio::io_service io_service;
         static Core core;
-        std::mutex mtx;
+        //std::mutex mtx;
 
         server s(io_service);
         
-        std::thread th2([&io_service, &mtx](){
+        std::thread th2([&io_service/*, &mtx*/](){
             unsigned int load = 10;
 
             while(true) {
@@ -30,9 +30,9 @@ int main()
                         load++;
                     }
                 }
-                mtx.lock();
+                //mtx.lock();
                 io_service.post(consCall);
-                mtx.unlock();
+                //mtx.unlock();
 
                 std::this_thread::sleep_for(std::chrono::milliseconds(load));
             }

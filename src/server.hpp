@@ -110,48 +110,6 @@ private:
     enum { max_length = 1024 };
     char data_[max_length];
 };
-/*
-class session2
-{
-public:
-    session2(boost::asio::io_service& io_service)
-        : socket_(io_service)
-    {
-    }
-
-    tcp::socket& socket()
-    {
-        return socket_;
-    }
-
-    void start()
-    {
-        char data_[1024];
-        socket_.async_read_some(boost::asio::buffer(data_, 1024),
-            boost::bind(&session::handle_read, this,
-                boost::asio::placeholders::error,
-                boost::asio::placeholders::bytes_transferred));
-    }
-
-    // Обработка полученного сообщения.
-    void handle_read(const boost::system::error_code& error,
-        size_t bytes_transferred)
-    {
-        if (!error)
-        {
-            GetCore().Consume();
-        }
-        else
-        {
-            delete this;
-        }
-    }
-
-private:
-    tcp::socket socket_;
-};
-*/
-
 
 class server
 {

@@ -17,11 +17,8 @@ int main()
         std::mutex mtx;
 
         server s(io_service);
-
-        //io_service.run();
         
         std::thread th2([&io_service, &mtx](){
-            //tcp::acceptor acceptor(io_service);
             unsigned int load = 10;
 
             while(true) {
@@ -75,7 +72,6 @@ int main()
             while(true) {
                 core.Consume();
             }
-            *//*
         });
         
     */

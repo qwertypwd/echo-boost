@@ -28,7 +28,7 @@ struct Fixture
 	std::string bibaId;
 	std::string bobaId;
 };
-/*
+
 BOOST_FIXTURE_TEST_CASE(testCore, Fixture)
 {
 }
@@ -99,7 +99,6 @@ BOOST_FIXTURE_TEST_CASE(testCoreQueueEquals, Fixture)
 	auto head = core.sq.top();
 	BOOST_CHECK_EQUAL(head->getAppCliendId(), 0);
 }
-*/
 
 BOOST_FIXTURE_TEST_CASE(testCoreConsumer, Fixture)
 {

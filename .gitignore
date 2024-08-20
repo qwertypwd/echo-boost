@@ -50,3 +50,9 @@ Thumbs.db
 
 # VSCode
 .vscode
+
+# Build
+build/*
+
+# Bin
+bin/*

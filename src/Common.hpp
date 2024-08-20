@@ -26,9 +26,9 @@ namespace Serialization
         }
         virtual void setBody() = 0;
         nlohmann::json get() {
-            nlohmann::json j = std::move(rq);
+            nlohmann::json&& j = std::move(rq);
             this->~ISerializer();
-            return std::move(j);
+            return j;
         }
     protected:
         nlohmann::json rq;

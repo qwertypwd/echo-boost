@@ -49,7 +49,6 @@ public:
     // Application create
     void CreateApplication(const nlohmann::json& j)
     {
-        this->SetRecentFlag(true);
         Models::Application* app = new Models::Application(j);
         if(j["ReqType"] == Requests::Sale) 
         {
@@ -114,13 +113,6 @@ public:
         }
     }
 
-    bool GetRecentFlag() {
-        return recentApp;
-    }
-
-    void SetRecentFlag(bool b) {
-        recentApp = b;
-    }
 private:
     // <UserId, User*> userlist
     std::map<size_t, Models::User*> mUsers;
@@ -129,11 +121,16 @@ private:
     // <User*> purchase app queue
     std::priority_queue<Models::Application*, std::vector<Models::Application*>, Models::Application::less> pq;
     // Kostil))0
-    bool recentApp = false;
 };
 
 Core& GetCore()
 {
     static Core core;
     return core;
+}
+
+std::mutex& GetMutex()
+{
+    static std::mutex mtx;
+    return mtx;
 }

@@ -14,27 +14,32 @@ int main()
     {
         boost::asio::io_service io_service;
         static Core core;
-        //std::mutex mtx;
+        static std::mutex mtx;
 
         server s(io_service);
         
-        std::thread th2([&io_service/*, &mtx*/](){
+        std::thread th2([&io_service](){
             unsigned int load = 10;
 
             while(true) {
+                /*
+                unsigned int load = 2;
                 if(core.GetRecentFlag()) {
-                    load = 10;
+                    load = 2;
                     core.SetRecentFlag(false);
                 } else {
                     if (load < 100) {
                         load++;
                     }
                 }
-                //mtx.lock();
-                io_service.post(consCall);
-                //mtx.unlock();
+                */
+                io_service.post([]() {
+                    mtx.lock();
+                    core.Consume();
+                    mtx.unlock();
+                });
 
-                std::this_thread::sleep_for(std::chrono::milliseconds(load));
+                std::this_thread::sleep_for(std::chrono::milliseconds(2));
             }
             
         });

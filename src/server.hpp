@@ -73,6 +73,8 @@ public:
         std::string reply;
         std::string reqType = j["ReqType"];
 
+        GetMutex().lock();
+
         if (reqType == Requests::Registration)
         {
             // Это реквест на регистрацию пользователя.
@@ -103,6 +105,9 @@ public:
         {
             reply = "Error! Unknown request type";
         }
+
+        GetMutex().unlock();
+
         return reply;
     }
 
@@ -152,7 +157,3 @@ private:
     boost::asio::io_service& io_service_;
     tcp::acceptor acceptor_;
 };
-
-void consCall() {
-    GetCore().Consume();
-}
